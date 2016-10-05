@@ -1,15 +1,41 @@
 /* blah blah */
-
-#include "Arduino.h"
-
 #ifndef AD7193_h
 #define AD7193_h
+
+#include <Arduino.h>
+#include <SPI.h>
+
+#define AD7193_CS_PIN     10  // define the chipselect
+#define AD7193_RDY_STATE  8   // pin to watch for data ready state
+
+/* AD7193 Register Map */
+#define AD7193_REG_COMM         0 // Communications Register (WO, 8-bit) 
+#define AD7193_REG_STAT         0 // Status Register         (RO, 8-bit) 
+#define AD7193_REG_MODE         1 // Mode Register           (RW, 24-bit 
+#define AD7193_REG_CONF         2 // Configuration Register  (RW, 24-bit)
+#define AD7193_REG_DATA         3 // Data Register           (RO, 24/32-bit) 
+#define AD7193_REG_ID           4 // ID Register             (RO, 8-bit) 
+#define AD7193_REG_GPOCON       5 // GPOCON Register         (RW, 8-bit) 
+#define AD7193_REG_OFFSET       6 // Offset Register         (RW, 24-bit 
+#define AD7193_REG_FULLSCALE    7 // Full-Scale Register     (RW, 24-bit)
+
+/* Communications Register Bit Designations (AD7193_REG_COMM) */
+#define AD7193_COMM_WEN         (1 << 7)           // Write Enable. 
+#define AD7193_COMM_WRITE       (0 << 6)           // Write Operation.
+#define AD7193_COMM_READ        (1 << 6)           // Read Operation. 
+#define AD7193_COMM_ADDR(x)     (((x) & 0x7) << 3) // Register Address. 
+#define AD7193_COMM_CREAD       (1 << 2)           // Continuous Read of Data Register.
+
+
+
+
 
 class AD7193
 {
 public:
 	AD7193(void); //need to add this function
 	//bool begin(Stream &serialPort = Serial);  // does this help me specify serial?
+	bool begin(void);
 
 	void Reset(void);
 

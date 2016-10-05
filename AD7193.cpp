@@ -1,29 +1,6 @@
 /*blah blah*/
 
-#include <Arduino.h>
 #include <AD7193.h>
-#include <SPI.h>
-
-#define AD7193_CS_PIN     10  // define the chipselect
-#define AD7193_RDY_STATE  8   // pin to watch for data ready state
-
-/* AD7193 Register Map */
-#define AD7193_REG_COMM         0 // Communications Register (WO, 8-bit) 
-#define AD7193_REG_STAT         0 // Status Register         (RO, 8-bit) 
-#define AD7193_REG_MODE         1 // Mode Register           (RW, 24-bit 
-#define AD7193_REG_CONF         2 // Configuration Register  (RW, 24-bit)
-#define AD7193_REG_DATA         3 // Data Register           (RO, 24/32-bit) 
-#define AD7193_REG_ID           4 // ID Register             (RO, 8-bit) 
-#define AD7193_REG_GPOCON       5 // GPOCON Register         (RW, 8-bit) 
-#define AD7193_REG_OFFSET       6 // Offset Register         (RW, 24-bit 
-#define AD7193_REG_FULLSCALE    7 // Full-Scale Register     (RW, 24-bit)
-
-/* Communications Register Bit Designations (AD7193_REG_COMM) */
-#define AD7193_COMM_WEN         (1 << 7)           // Write Enable. 
-#define AD7193_COMM_WRITE       (0 << 6)           // Write Operation.
-#define AD7193_COMM_READ        (1 << 6)           // Read Operation. 
-#define AD7193_COMM_ADDR(x)     (((x) & 0x7) << 3) // Register Address. 
-#define AD7193_COMM_CREAD       (1 << 2)           // Continuous Read of Data Register.
 
 // default register settings
 unsigned long registerMap[4] = {
@@ -45,17 +22,21 @@ int registerSize[8] = {
 };
 
 
+
 AD7193::AD7193() {
   // Constructor
 }
 
 // need to fill this out
-//AD7193::begin(int16_t chipSelectPin) {
+bool AD7193::begin(void) {
+  SPI.begin();
+  SPI.setDataMode(SPI_MODE3);
+  SPI.setClockDivider(SPI_CLOCK_DIV16);
+  pinMode(AD7193_RDY_STATE, INPUT_PULLUP);
   //or begin(Stream &serialPort)
-// setup SPI?
-// setup serial?
- //LibrarySerial = &serialPort; //Grab which port the user wants us to use
-// }
+  // setup serial?
+  //LibrarySerial = &serialPort; //Grab which port the user wants us to use
+}
 
 
 void AD7193::Reset(void)  {
@@ -91,13 +72,12 @@ void AD7193::SetPGAGain(int gain)  {
     return;
   }
 
-  registerMap[2] &= 0xFFFFF8; //keep all bit values except gain bits
-  registerMap[2] |= gainSetting;
+  int regAddress = AD7193_REG_CONF;
 
-  SetRegisterValue(2, registerMap[2], registerSize[2], 1);
+  registerMap[regAddress] &= 0xFFFFF8; //keep all bit values except gain bits
+  registerMap[regAddress] |= gainSetting;
 
-  //Serial.print(" on next register refresh - New Config Reg value will be: ");
-  //Serial.println(registerMap[2], HEX);
+  SetRegisterValue(regAddress, registerMap[regAddress], registerSize[regAddress], 1);
 }
 
 void AD7193::SetAveraging(int filterRate)  {

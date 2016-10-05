@@ -20,18 +20,7 @@ void setup() {
   Serial.begin(9600);
   delay(1000);
   
-  SPI.begin();
-  SPI.setDataMode(SPI_MODE3);
-  SPI.setClockDivider(SPI_CLOCK_DIV16);
-
-
-  ///////////////////////////
-  // Initial setup and reset
-  ///////////////////////////
-
-  //Setup watch pin as a pullup
-  // need to fix!
-  pinMode(8, INPUT_PULLUP);
+  AD7193.begin();
 
   // Reset AD7193
   AD7193.Reset();
