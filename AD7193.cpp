@@ -33,6 +33,8 @@ bool AD7193::begin(void) {
   SPI.setDataMode(SPI_MODE3);
   SPI.setClockDivider(SPI_CLOCK_DIV16);
   pinMode(AD7193_RDY_STATE, INPUT_PULLUP);
+
+  Reset();
   //or begin(Stream &serialPort)
   // setup serial?
   //LibrarySerial = &serialPort; //Grab which port the user wants us to use
@@ -222,6 +224,34 @@ unsigned long AD7193::ReadADCData(void)  {
     return(buffer);
 }
 
+unsigned long AD7193::ReadADCChannel(int channel)  {
+  
+    
+    unsigned long ADCdata = 0;
+    unsigned long shiftvalue = 0x00000100;
+    shiftvalue = shiftvalue << channel;
+    
+    registerMap[2] &= 0xFC00FF; //keep all bit values except Channel bits
+    registerMap[2] |= shiftvalue;
+
+    SetRegisterValue(2, registerMap[2], registerSize[2], 1);
+
+    IntitiateSingleConversion();
+    delay(100); // hardcoded wait time for data to be ready
+    // should scale the wait time by averaging
+
+    //WaitRdyGoLow();
+    
+    ADCdata = ReadADCData();
+    delay(10);
+
+    // end communication cycle, bringing CS pin High manually 
+    digitalWrite(AD7193_CS_PIN, HIGH);
+    delay(100);
+
+    return(ADCdata);
+}
+
 void AD7193::SingleConversionAndReadADC(long unsigned int *ADCDataByChannel)  {
 
   unsigned long ADCDataBuffer[10];
@@ -256,7 +286,7 @@ void AD7193::SingleConversionAndReadADC(long unsigned int *ADCDataByChannel)  {
 }
 
 void AD7193::IntitiateSingleConversion(void) {
-  Serial.print("    Initiate Single Conversion... (Device will go into low pwer mode when conversion complete)");
+  //Serial.print("    Initiate Single Conversion... (Device will go into low pwer mode when conversion complete)");
 
   // Begin Communication cycle, bring CS low manually
   digitalWrite(AD7193_CS_PIN, LOW);
@@ -427,12 +457,12 @@ void AD7193::SetRegisterValue(unsigned char registerAddress,  unsigned long regi
       digitalWrite(AD7193_CS_PIN, HIGH);
     }
 
-    Serial.print("    Write Register Address: ");
+    /*Serial.print("    Write Register Address: ");
     Serial.print(registerAddress, HEX);
     Serial.print(", command: ");
     Serial.print(commandByte, HEX);
     Serial.print(",     sent: ");
-    Serial.println(registerValue, HEX);
+    Serial.println(registerValue, HEX);*/
 }
 
 void AD7193::ReadRegisterMap(void)  {

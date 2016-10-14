@@ -49,6 +49,7 @@ public:
 	void IntitiateInternalCalibration(void);
 	void WaitRdyGoLow(void);
 	unsigned long ReadADCData(void);
+	unsigned long ReadADCChannel(int channel);
 	void SingleConversionAndReadADC(long unsigned int *ADCDataByChannel);  // this needs to be a pointer
 	void IntitiateSingleConversion(void);
 
