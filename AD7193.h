@@ -35,27 +35,26 @@ class AD7193
 public:
 	AD7193(void); //need to add this function
 	//bool begin(Stream &serialPort = Serial);  // does this help me specify serial?
+	
 	bool begin(void);
-
 	void Reset(void);
+	void Calibrate(void);
 
 	void SetPGAGain(int gain);
 	void SetAveraging(int filterRate);
-	void SetChannelSelect(unsigned long wordValue);
-	void ChannelEnable(int channel);
+	void SetChannel(int channel);
+	
 	void SetPsuedoDifferentialInputs(void);
 	void AppendStatusValuetoData(void);
 
-	void IntitiateInternalCalibration(void);
+	
 	void WaitRdyGoLow(void);
-	unsigned long ReadADCData(void);
+	
 	unsigned long ReadADCChannel(int channel);
-	void SingleConversionAndReadADC(long unsigned int *ADCDataByChannel);  // this needs to be a pointer
-	void IntitiateSingleConversion(void);
+	
 
 	float BinaryToVoltage(long rawData);
 	float BinaryToTemperatureDegC(unsigned long rawData);
-	void DisplayADCData(long unsigned int ADCDataByChannel[]);
 	
 	unsigned long GetRegisterValue(unsigned char registerAddress,
                                        unsigned char bytesNumber,
@@ -65,8 +64,16 @@ public:
                               unsigned char bytesNumber,
                               unsigned char modifyCS);
 
-	void WriteAllRegisters(void);
+	
 	void ReadRegisterMap(void);
+
+	//void SetChannelSelect(unsigned long wordValue);
+	//void ChannelEnable(int channel);
+	unsigned long ReadADCData(void);
+	//void SingleConversionAndReadADC(long unsigned int *ADCDataByChannel);  // this needs to be a pointer
+	void IntitiateSingleConversion(void);
+	//void DisplayADCData(long unsigned int ADCDataByChannel[]);
+	//void WriteAllRegisters(void);
 
 
 private:

@@ -97,12 +97,11 @@ void AD7193::SetAveraging(int filterRate)  {
 
   SetRegisterValue(1, registerMap[1], registerSize[1], 1);
 
-  //Serial.print(" on next register refresh - New Mode Reg value will be: ");
-  //Serial.println(registerMap[1], HEX);
-  //Serial.println(); 
 }
 
-void AD7193::SetChannelSelect(unsigned long wordValue)  {
+
+
+/*void AD7193::SetChannelSelect(unsigned long wordValue)  {
 
   Serial.print("\nSetting Channel Select Word to ");
   Serial.println(wordValue, HEX);
@@ -111,12 +110,9 @@ void AD7193::SetChannelSelect(unsigned long wordValue)  {
   registerMap[2] |= wordValue << 8;
 
   SetRegisterValue(2, registerMap[2], registerSize[2], 1);
-  
-  //Serial.print(" on next register refresh - New Config Reg value will be: ");
-  //Serial.println(registerMap[2], HEX); 
-}
+}*/
 
-void AD7193::ChannelEnable(int channel)  {
+/*void AD7193::ChannelEnable(int channel)  {
   Serial.print("\nEnabling Channel ");
   Serial.println(channel);
 
@@ -125,10 +121,7 @@ void AD7193::ChannelEnable(int channel)  {
   registerMap[2] |= shiftvalue;
 
   SetRegisterValue(2, registerMap[2], registerSize[2], 1);
-
-  //Serial.print(" - on next register refresh, new Config Reg value will be: ");
-  //Serial.println(registerMap[2], HEX);
-}
+}*/
 
 void AD7193::SetPsuedoDifferentialInputs(void)  {
   Serial.println("Switching from differential input to pseudo differential inputs...");
@@ -157,7 +150,7 @@ void AD7193::AppendStatusValuetoData(void) {
   registerSize[3] = 4; // change register size to 4, b/c status register is now appended
 }
 
-void AD7193::IntitiateInternalCalibration(void) {
+void AD7193::Calibrate(void) {
   Serial.println("\nInitiate Internal Calibration, starting with Zero-scale calibration...");
 
   // Begin Communication cycle, bring CS low manually
@@ -205,12 +198,25 @@ void AD7193::WaitRdyGoLow(void)  {
     }
 }
 
+void AD7193::IntitiateSingleConversion(void) {
+  //Serial.print("    Initiate Single Conversion... (Device will go into low pwer mode when conversion complete)");
+
+  // Begin Communication cycle, bring CS low manually
+  digitalWrite(AD7193_CS_PIN, LOW);
+  delay(100);
+  
+  registerMap[1] &= 0x1FFFFF; //keep all bit values except Channel bits
+  registerMap[1] |= 0x200000; // single conversion mode bits  
+
+  SetRegisterValue(1, registerMap[1], 3, 0);  // overwriting previous MODE reg setting 
+}
+
 unsigned long AD7193::ReadADCData(void)  {
   
     unsigned char byteIndex = 0;
     unsigned long buffer = 0;
     unsigned char receiveBuffer = 0;
-    unsigned char dataLength = registerSize[3];
+    unsigned char dataLength = registerSize[3];  // data length depends on if Status register is appended to Data read - see AppendStatusValuetoData()
 
     SPI.transfer(0x58);  // command to start read data
     
@@ -224,25 +230,33 @@ unsigned long AD7193::ReadADCData(void)  {
     return(buffer);
 }
 
-unsigned long AD7193::ReadADCChannel(int channel)  {
-  
-    
-    unsigned long ADCdata = 0;
+void AD7193::SetChannel(int channel) {
+
+    // generate Channel settings bits for Configuration write
     unsigned long shiftvalue = 0x00000100;
-    shiftvalue = shiftvalue << channel;
+    unsigned long channelBits = shiftvalue << channel;
     
+    // Write Channel bits to Config register, keeping other bits as is
     registerMap[2] &= 0xFC00FF; //keep all bit values except Channel bits
-    registerMap[2] |= shiftvalue;
+    registerMap[2] |= channelBits;
 
+    // write channel selected to Configuration register
     SetRegisterValue(2, registerMap[2], registerSize[2], 1);
+    delay(100);
+}
 
+unsigned long AD7193::ReadADCChannel(int channel)  {
+     
+    SetChannel(channel);
+
+    // write command to initial conversion
     IntitiateSingleConversion();
     delay(100); // hardcoded wait time for data to be ready
     // should scale the wait time by averaging
 
     //WaitRdyGoLow();
     
-    ADCdata = ReadADCData();
+    unsigned long ADCdata = ReadADCData();
     delay(10);
 
     // end communication cycle, bringing CS pin High manually 
@@ -252,7 +266,9 @@ unsigned long AD7193::ReadADCChannel(int channel)  {
     return(ADCdata);
 }
 
-void AD7193::SingleConversionAndReadADC(long unsigned int *ADCDataByChannel)  {
+
+
+/*void AD7193::SingleConversionAndReadADC(long unsigned int *ADCDataByChannel)  {
 
   unsigned long ADCDataBuffer[10];
   int NumOfChannels = 0;
@@ -283,20 +299,9 @@ void AD7193::SingleConversionAndReadADC(long unsigned int *ADCDataByChannel)  {
   // end communication cycle, bringing CS pin High manually 
   digitalWrite(AD7193_CS_PIN, HIGH);
   delay(100);
-}
+}*/
 
-void AD7193::IntitiateSingleConversion(void) {
-  //Serial.print("    Initiate Single Conversion... (Device will go into low pwer mode when conversion complete)");
 
-  // Begin Communication cycle, bring CS low manually
-  digitalWrite(AD7193_CS_PIN, LOW);
-  delay(100);
-  
-  registerMap[1] &= 0x1FFFFF; //keep all bit values except Channel bits
-  registerMap[1] |= 0x200000; // single conversion mode bits  
-
-  SetRegisterValue(1, registerMap[1], 3, 0);  // overwriting previous MODE reg setting 
-}
 
 float AD7193::BinaryToVoltage(long rawData)  {
   float voltage = 0;
@@ -351,7 +356,7 @@ float AD7193::BinaryToTemperatureDegC(unsigned long rawData)  {
         return(degC);
 }
 
-void AD7193::DisplayADCData(long unsigned int ADCDataByChannel[]) {
+/*void AD7193::DisplayADCData(long unsigned int ADCDataByChannel[]) {
 
   unsigned long channelSetting = (registerMap[2] & 0x03FF00) >> 8;
 
@@ -385,7 +390,7 @@ void AD7193::DisplayADCData(long unsigned int ADCDataByChannel[]) {
   }
 
   Serial.println();
-}
+}*/
 
 /*! Reads the value of a register. */
 unsigned long AD7193::GetRegisterValue(unsigned char registerAddress, unsigned char bytesNumber, unsigned char modifyCS)  {//getregistervalue
@@ -477,11 +482,11 @@ void AD7193::ReadRegisterMap(void)  {
   delay(100);
 }
 
-void AD7193::WriteAllRegisters(void) {
+/*void AD7193::WriteAllRegisters(void) {
   Serial.println("\nWriting all new register values to registers...");
   SetRegisterValue(1, registerMap[1], registerSize[1], 1);
   SetRegisterValue(2, registerMap[2], registerSize[2], 1);
   SetRegisterValue(3, registerMap[3], registerSize[3], 1);
   SetRegisterValue(4, registerMap[4], registerSize[4], 1);
   delay(100);
-}
+}*/

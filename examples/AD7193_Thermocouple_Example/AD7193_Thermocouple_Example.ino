@@ -52,7 +52,7 @@ void setup() {
   // Calibrate with given PGA settings - need to recalibrate if PGA setting is changed
   /////////////////////////////////////
   
-  AD7193.IntitiateInternalCalibration();
+  AD7193.Calibrate();
 
   // Check register map values
   AD7193.ReadRegisterMap();
@@ -90,18 +90,22 @@ void loop() {
 
   // Convert AD7193 data to temperature for IC Termerature channel (8)
   float ambientTemp = AD7193.BinaryToTemperatureDegC(channel8 >> 8);
+  float referenceVoltage = Thermocouple_Ktype_TempToVoltageDegC(ambientTemp);
 
-  // Convert voltage to tmerpature for Channel 1 - with K-type thermocouple connected
-  float thermocoupleTempRelative = Thermocouple_Ktype_VoltageToTempDegC(AD7193.BinaryToVoltage((channel1 >> 8)));
+  // measure thermocouple voltage, and compensate for CJC
+  float thermocoupleVoltage = AD7193.BinaryToVoltage(channel1 >> 8);
+  float compensatedVoltage = thermocoupleVoltage + referenceVoltage;
+  float compensatedTemperature = Thermocouple_Ktype_VoltageToTempDegC(compensatedVoltage);
 
-  // report Thermocouple measurement results
-  Serial.print("\n\t\tChannel 1 Thermocouple: ");
-  Thermocouple_PrintResults(ambientTemp, thermocoupleTempRelative, "degC");
+  Serial.print("\n\t\tChannel 1 Compensated Thermocouple Voltage Measurement: ");
+  Serial.print(compensatedTemperature);  Serial.println(" degC");
+  Serial.println("\t\t\tThermocouple Measurement Details:");
+  Serial.print("\t\t\tThermocouple Voltage: ");  Serial.println(thermocoupleVoltage, 5);
+  Serial.print("\t\t\tReference Temp: ");  Serial.println(ambientTemp, 5);
+  Serial.print("\t\t\tReference Voltage: ");  Serial.println(referenceVoltage, 5);
   
   delay(900);
 }
-
-
 
 
 
