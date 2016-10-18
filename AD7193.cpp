@@ -32,7 +32,7 @@ bool AD7193::begin(void) {
   SPI.begin();
   SPI.setDataMode(SPI_MODE3);
   SPI.setClockDivider(SPI_CLOCK_DIV16);
-  pinMode(AD7193_RDY_STATE, INPUT_PULLUP);
+  //pinMode(AD7193_RDY_STATE, INPUT_PULLUP);
 
   Reset();
   //or begin(Stream &serialPort)
@@ -162,7 +162,8 @@ void AD7193::Calibrate(void) {
 
   SetRegisterValue(1, registerMap[1], 3, 0);  // overwriting previous MODE reg setting 
 
-  WaitRdyGoLow();
+  WaitForADC();
+  //delay(100);
 
   Serial.println("\nNow full-scale calibration...");
 
@@ -172,14 +173,17 @@ void AD7193::Calibrate(void) {
 
   SetRegisterValue(1, registerMap[1], 3, 0);  // overwriting previous MODE reg setting 
 
-  WaitRdyGoLow();
+  WaitForADC();
+  //delay(100);
 
   digitalWrite(AD7193_CS_PIN, HIGH);
   delay(100); 
 }
 
-void AD7193::WaitRdyGoLow(void)  {
+void AD7193::WaitForADC(void)  {
     int breakTime = 0;
+
+    Serial.print("\nWaiting for Conversion");
 
     while(1){
       if (digitalRead(AD7193_RDY_STATE) == 0){      // Break if ready goes low
@@ -187,12 +191,11 @@ void AD7193::WaitRdyGoLow(void)  {
       }
 
       if (breakTime > 5000) {                       // Break after five seconds - avoids program hanging up
-        Serial.print("Data Ready never went low!  Make sure Arduino pin ");
-        Serial.print(AD7193_RDY_STATE);
-        Serial.println(" is connected to AD7193 DOUT pin");
+        Serial.print("Data Ready never went low!");
         break;
       }
 
+      if (digitalRead(AD7193_RDY_STATE)) {Serial.print(".");}
       delay(1);
       breakTime = breakTime + 1;
     }
@@ -242,7 +245,7 @@ void AD7193::SetChannel(int channel) {
 
     // write channel selected to Configuration register
     SetRegisterValue(2, registerMap[2], registerSize[2], 1);
-    delay(100);
+    delay(10);
 }
 
 unsigned long AD7193::ReadADCChannel(int channel)  {
@@ -251,17 +254,17 @@ unsigned long AD7193::ReadADCChannel(int channel)  {
 
     // write command to initial conversion
     IntitiateSingleConversion();
-    delay(100); // hardcoded wait time for data to be ready
+    //delay(100); // hardcoded wait time for data to be ready
     // should scale the wait time by averaging
 
-    //WaitRdyGoLow();
+    WaitForADC();
     
     unsigned long ADCdata = ReadADCData();
     delay(10);
 
     // end communication cycle, bringing CS pin High manually 
     digitalWrite(AD7193_CS_PIN, HIGH);
-    delay(100);
+    delay(10);
 
     return(ADCdata);
 }

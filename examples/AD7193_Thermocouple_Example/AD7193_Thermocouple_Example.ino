@@ -21,7 +21,7 @@ void setup() {
 
  
   // register check at initial reset
-  AD7193.ReadRegisterMap();
+  //AD7193.ReadRegisterMap();
 
   ////////////////////////////////////////////
   // add function for setting up thermocouple?
@@ -38,14 +38,7 @@ void setup() {
   
   AD7193.SetPGAGain(8);
 
-  AD7193.SetAveraging(80);
-  
-  
-  // This will write all registers - might be helpful for debug
-  //AD7193_WriteAllRegisters();
-  
-  // Check register map values
-  AD7193.ReadRegisterMap();
+  AD7193.SetAveraging(100);
   
 
   /////////////////////////////////////
@@ -98,13 +91,13 @@ void loop() {
   float compensatedTemperature = Thermocouple_Ktype_VoltageToTempDegC(compensatedVoltage);
 
   Serial.print("\n\t\tChannel 1 Compensated Thermocouple Voltage Measurement: ");
-  Serial.print(compensatedTemperature);  Serial.println(" degC");
+  Serial.print(compensatedTemperature, 3);  Serial.println(" degC");
   Serial.println("\t\t\tThermocouple Measurement Details:");
   Serial.print("\t\t\tThermocouple Voltage: ");  Serial.println(thermocoupleVoltage, 5);
   Serial.print("\t\t\tReference Temp: ");  Serial.println(ambientTemp, 5);
   Serial.print("\t\t\tReference Voltage: ");  Serial.println(referenceVoltage, 5);
   
-  delay(900);
+  delay(100);
 }
 
 

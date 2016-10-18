@@ -6,7 +6,7 @@
 #include <SPI.h>
 
 #define AD7193_CS_PIN     10  // define the chipselect
-#define AD7193_RDY_STATE  8   // pin to watch for data ready state
+#define AD7193_RDY_STATE  MISO   // pin to watch for data ready state
 
 /* AD7193 Register Map */
 #define AD7193_REG_COMM         0 // Communications Register (WO, 8-bit) 
@@ -46,15 +46,16 @@ public:
 	
 	void SetPsuedoDifferentialInputs(void);
 	void AppendStatusValuetoData(void);
-
-	
-	void WaitRdyGoLow(void);
 	
 	unsigned long ReadADCChannel(int channel);
+	unsigned long ReadADCData(void);
+	void IntitiateSingleConversion(void);
+	void WaitForADC(void);
 	
 
 	float BinaryToVoltage(long rawData);
 	float BinaryToTemperatureDegC(unsigned long rawData);
+	
 	
 	unsigned long GetRegisterValue(unsigned char registerAddress,
                                        unsigned char bytesNumber,
@@ -69,9 +70,8 @@ public:
 
 	//void SetChannelSelect(unsigned long wordValue);
 	//void ChannelEnable(int channel);
-	unsigned long ReadADCData(void);
+	
 	//void SingleConversionAndReadADC(long unsigned int *ADCDataByChannel);  // this needs to be a pointer
-	void IntitiateSingleConversion(void);
 	//void DisplayADCData(long unsigned int ADCDataByChannel[]);
 	//void WriteAllRegisters(void);
 
