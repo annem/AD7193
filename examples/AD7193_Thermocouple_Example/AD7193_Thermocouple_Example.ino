@@ -19,10 +19,6 @@ void setup() {
   
   AD7193.begin();
 
- 
-  // register check at initial reset
-  //AD7193.ReadRegisterMap();
-
   ////////////////////////////////////////////
   // add function for setting up thermocouple?
   // Would need a thermocouple_tempToVoltage function to determine min/max voltage to measure
@@ -47,7 +43,7 @@ void setup() {
   
   AD7193.Calibrate();
 
-  // Check register map values
+  // Debug - Check register map values
   AD7193.ReadRegisterMap();
   
 
@@ -59,30 +55,23 @@ void setup() {
 
 void loop() {
 
-  unsigned long channel0;
   unsigned long channel1;
-  unsigned long channel8;
+  unsigned long channelTemperature;
   
-  channel0 = AD7193.ReadADCChannel(0);
+  
+  // Read channel measurement data
   channel1 = AD7193.ReadADCChannel(1);
-  channel8 = AD7193.ReadADCChannel(8);
+  channelTemperature = AD7193.ReadADCChannel(8);
 
-  Serial.print("\nRaw Data out - CH0: ");
-  Serial.print(channel0 >> 8, HEX);
-
-  Serial.print("\tCH1: ");
+  Serial.print("\n\tCH1: ");
   Serial.print(channel1 >> 8, HEX);
 
   Serial.print("\tCH8 (temperature): ");
-  Serial.println(channel8 >> 8, HEX);
-
-  // report channel 0 voltage
-  Serial.print("\n\t\tChannel 0 Voltage: ");
-  Serial.print(AD7193.BinaryToVoltage(channel0 >> 8), 5);
+  Serial.println(channelTemperature >> 8, HEX);
   
 
   // Convert AD7193 data to temperature for IC Termerature channel (8)
-  float ambientTemp = AD7193.BinaryToTemperatureDegC(channel8 >> 8);
+  float ambientTemp = AD7193.BinaryToTemperatureDegC(channelTemperature >> 8);
   float referenceVoltage = Thermocouple_Ktype_TempToVoltageDegC(ambientTemp);
 
   // measure thermocouple voltage, and compensate for CJC
@@ -93,7 +82,7 @@ void loop() {
   Serial.print("\n\t\tChannel 1 Compensated Thermocouple Voltage Measurement: ");
   Serial.print(compensatedTemperature, 3);  Serial.println(" degC");
   Serial.println("\t\t\tThermocouple Measurement Details:");
-  Serial.print("\t\t\tThermocouple Voltage: ");  Serial.println(thermocoupleVoltage, 5);
+  Serial.print("\t\t\tThermocouple Voltage: ");  Serial.println(thermocoupleVoltage, 7);
   Serial.print("\t\t\tReference Temp: ");  Serial.println(ambientTemp, 5);
   Serial.print("\t\t\tReference Voltage: ");  Serial.println(referenceVoltage, 5);
   
