@@ -55,16 +55,16 @@ void setup() {
 
 void loop() {
 
-  unsigned long channel1;
+  unsigned long channel0;
   unsigned long channelTemperature;
   
   
   // Read channel measurement data
-  channel1 = AD7193.ReadADCChannel(1);
+  channel0 = AD7193.ReadADCChannel(0);
   channelTemperature = AD7193.ReadADCChannel(8);
 
-  Serial.print("\n\tCH1: ");
-  Serial.print(channel1 >> 8, HEX);
+  Serial.print("\n\tCH0: ");
+  Serial.print(channel0 >> 8, HEX);
 
   Serial.print("\tCH8 (temperature): ");
   Serial.println(channelTemperature >> 8, HEX);
@@ -75,11 +75,11 @@ void loop() {
   float referenceVoltage = Thermocouple_Ktype_TempToVoltageDegC(ambientTemp);
 
   // measure thermocouple voltage, and compensate for CJC
-  float thermocoupleVoltage = AD7193.BinaryToVoltage(channel1 >> 8);
+  float thermocoupleVoltage = AD7193.BinaryToVoltage(channel0 >> 8);
   float compensatedVoltage = thermocoupleVoltage + referenceVoltage;
   float compensatedTemperature = Thermocouple_Ktype_VoltageToTempDegC(compensatedVoltage);
 
-  Serial.print("\n\t\tChannel 1 Compensated Thermocouple Voltage Measurement: ");
+  Serial.print("\n\t\tChannel 0 Compensated Thermocouple Voltage Measurement: ");
   Serial.print(compensatedTemperature, 3);  Serial.println(" degC");
   Serial.println("\t\t\tThermocouple Measurement Details:");
   Serial.print("\t\t\tThermocouple Voltage: ");  Serial.println(thermocoupleVoltage, 7);
