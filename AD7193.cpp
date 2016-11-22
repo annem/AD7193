@@ -127,7 +127,8 @@ void AD7193::SetPsuedoDifferentialInputs(void)  {
   Serial.println("Switching from differential input to pseudo differential inputs...");
   
   unsigned long psuedoBit = 0x040000;
-  registerMap[2] |= psuedoBit;
+  registerMap[2] &= 0xFBFFFF;
+  registerMap[2] |= 0x040000;
 
   SetRegisterValue(2, registerMap[2], registerSize[2], 1);
 
