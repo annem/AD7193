@@ -19,7 +19,6 @@ void setup() {
   
   AD7193.begin();
 
-
   ///////////////////////////////////
   // Device setup
   ///////////////////////////////////
@@ -39,7 +38,6 @@ void setup() {
 
   // Debug - Check register map values
   AD7193.ReadRegisterMap();
-  
 
   //////////////////////////////////////
   
@@ -49,23 +47,23 @@ void setup() {
 
 void loop() {
 
-  unsigned long channel1;
-  
+  unsigned long ch1Data;
+  float ch1Voltage;
   
   // Read channel measurement data
-  channel1 = AD7193.ReadADCChannel(1);
+  ch1Data = (AD7193.ReadADCChannel(1) >> 8);
 
-  Serial.print("\n\tCH1: ");
-  Serial.print(channel1 >> 8, HEX);
+  Serial.print("  CH1 data: ");
+  Serial.print(ch1Data, HEX);
 
-  float channel1Voltage = AD7193.BinaryToVoltage(channel1 >> 8);
+  // Convert to voltage
+  ch1Voltage = AD7193.DataToVoltage(ch1Data);
   
   Serial.print("\n\t\tChannel 1 Voltage Measurement: ");
-  Serial.println(channel1Voltage, 3);  
+  Serial.println(ch1Voltage, 3);  
    
   delay(100);
 }
-
 
 
 
