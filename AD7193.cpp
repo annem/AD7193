@@ -234,6 +234,7 @@ unsigned long AD7193::ReadADCData(void)  {
     return(buffer);
 }
 
+
 void AD7193::SetChannel(int channel) {
 
     // generate Channel settings bits for Configuration write
@@ -307,7 +308,7 @@ unsigned long AD7193::ReadADCChannel(int channel)  {
 
 
 
-float AD7193::BinaryToVoltage(long rawData)  {
+float AD7193::DataToVoltage(long rawData)  {
   float voltage = 0;
   char mGain = 0;
   float mVref = 2.5;
@@ -350,7 +351,8 @@ float AD7193::BinaryToVoltage(long rawData)  {
   return(voltage);
 }
 
-float AD7193::BinaryToTemperatureDegC(unsigned long rawData)  {
+// See "Tempature Sensor" section of AD7193 Datasheet - page 39
+float AD7193::TempSensorDataToDegC(unsigned long rawData)  {
         float degC = (float(rawData - 0x800000) / 2815) - 273;
         float degF = (degC * 9 / 5) + 32;
         /*Serial.print(degC);

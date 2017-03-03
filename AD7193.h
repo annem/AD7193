@@ -53,8 +53,8 @@ public:
 	void WaitForADC(void);
 	
 
-	float BinaryToVoltage(long rawData);
-	float BinaryToTemperatureDegC(unsigned long rawData);
+	float DataToVoltage(long rawData);
+	float TempSensorDataToDegC(unsigned long rawData);
 	
 	
 	unsigned long GetRegisterValue(unsigned char registerAddress,
