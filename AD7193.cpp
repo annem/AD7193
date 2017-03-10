@@ -33,6 +33,9 @@ bool AD7193::begin(void) {
   SPI.setDataMode(SPI_MODE3);
   SPI.setClockDivider(SPI_CLOCK_DIV16);
   //pinMode(AD7193_RDY_STATE, INPUT_PULLUP);
+  
+  pinMode(AD7193_CS_PIN, OUTPUT);
+  delay(100);
 
   Reset();
   //or begin(Stream &serialPort)
