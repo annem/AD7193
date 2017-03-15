@@ -138,7 +138,7 @@ void loop() {
   Serial.println("\n\t\tThermocouple Measurement Details:");
   Serial.print("\t\t\tThermocouple Voltage: ");  Serial.println(thermocoupleVoltage, 7);
   Serial.print("\t\t\tReference Temp: ");  Serial.println(ambientTemp, 5);
-  Serial.print("\t\t\tReference Voltage: ");  Serial.println(referenceVoltage, 5);
+  Serial.print("\t\t\tReference Temp Voltage Equivalent: ");  Serial.println(referenceVoltage, 5);
   Serial.println("");
   
   delay(100);
