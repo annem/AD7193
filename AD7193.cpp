@@ -45,7 +45,7 @@ bool AD7193::begin(void) {
 
 
 void AD7193::Reset(void)  {
-  Serial.println("\nReset Device...");
+  Serial.println("\nReset AD7193...");
 
   digitalWrite(AD7193_CS_PIN, LOW);
   delay(100);
@@ -103,29 +103,6 @@ void AD7193::SetAveraging(int filterRate)  {
 }
 
 
-
-/*void AD7193::SetChannelSelect(unsigned long wordValue)  {
-
-  Serial.print("\nSetting Channel Select Word to ");
-  Serial.println(wordValue, HEX);
-  
-  registerMap[2] &= 0xFC00FF; //keep all bit values except Channel bits
-  registerMap[2] |= wordValue << 8;
-
-  SetRegisterValue(2, registerMap[2], registerSize[2], 1);
-}*/
-
-/*void AD7193::ChannelEnable(int channel)  {
-  Serial.print("\nEnabling Channel ");
-  Serial.println(channel);
-
-  unsigned long shiftvalue = 0x00000100;
-  shiftvalue = shiftvalue << channel;
-  registerMap[2] |= shiftvalue;
-
-  SetRegisterValue(2, registerMap[2], registerSize[2], 1);
-}*/
-
 void AD7193::SetPsuedoDifferentialInputs(void)  {
   Serial.println("Switching from differential input to pseudo differential inputs...");
   
@@ -140,7 +117,7 @@ void AD7193::SetPsuedoDifferentialInputs(void)  {
 }
 
 void AD7193::AppendStatusValuetoData(void) {
-  Serial.println("\nEnabling DAT_STA Bit (appends status register to data register when reading");
+  Serial.println("\nEnabling DAT_STA Bit (appends status register to data register when reading)");
 
 
   registerMap[1] &= 0xEFFFFF; //keep all bit values except DAT_STA bit
@@ -155,7 +132,7 @@ void AD7193::AppendStatusValuetoData(void) {
 }
 
 void AD7193::Calibrate(void) {
-  Serial.println("\nInitiate Internal Calibration, starting with Zero-scale calibration...");
+  Serial.print("\nInitiate Internal Calibration, starting with Zero-scale calibration...");
 
   // Begin Communication cycle, bring CS low manually
   digitalWrite(AD7193_CS_PIN, LOW);
@@ -169,7 +146,7 @@ void AD7193::Calibrate(void) {
   WaitForADC();
   //delay(100);
 
-  Serial.println("\nNow full-scale calibration...");
+  Serial.print("\n\nNow full-scale calibration...");
 
 
   registerMap[1] &= 0x1FFFFF; //keep all bit values except Channel bits
@@ -276,41 +253,6 @@ unsigned long AD7193::ReadADCChannel(int channel)  {
 
 
 
-/*void AD7193::SingleConversionAndReadADC(long unsigned int *ADCDataByChannel)  {
-
-  unsigned long ADCDataBuffer[10];
-  int NumOfChannels = 0;
-  unsigned long channelSetting = (registerMap[2] & 0x03FF00) >> 8;
- 
-  // tally up number of channels enabled, and clear ADCDataByChannel array
-  for(int i = 0; i < 10; i++) {
-    NumOfChannels += bitRead(channelSetting, i);
-    ADCDataByChannel[i] = 0x0;
-  }
-
-  // initiate, single conversion - Set Mode Register per Page 35 of data sheet
-  IntitiateSingleConversion();
-
-  // grab channel data, looping for each channel that's enabled
-  for(int i = 0; i < NumOfChannels; i++) {
-
-    WaitRdyGoLow();  // wait for ADC conversion to complete - Dout pin will go low
-    
-    ADCDataBuffer[i] = ReadADCData();  // read data
-    delay(10); 
-
-    // sort the data into an array with location = channel number
-    int channelNumber = ADCDataBuffer[i] & 0xFF;
-    ADCDataByChannel[channelNumber] = ADCDataBuffer[i];
-  }
-
-  // end communication cycle, bringing CS pin High manually 
-  digitalWrite(AD7193_CS_PIN, HIGH);
-  delay(100);
-}*/
-
-
-
 float AD7193::DataToVoltage(long rawData)  {
   float voltage = 0;
   char mGain = 0;
@@ -365,41 +307,6 @@ float AD7193::TempSensorDataToDegC(unsigned long rawData)  {
         return(degC);
 }
 
-/*void AD7193::DisplayADCData(long unsigned int ADCDataByChannel[]) {
-
-  unsigned long channelSetting = (registerMap[2] & 0x03FF00) >> 8;
-
-  Serial.print("\n\t\t\t\t\t");
-
-  for(int i = 0; i < 10; i++) {
-    if (bitRead(channelSetting, i) == 1) {
-      Serial.print("CH");
-      //Serial.print(ADCDataByChannel[i] & 0xFF);
-      Serial.print(i);
-      Serial.print("\t\t");
-    }
-  }
-
-  Serial.print("\n\t\tRaw Data Received:\t");
-  
-  for(int i = 0; i < 10; i++) {
-    if (bitRead(channelSetting, i) == 1) {
-      Serial.print((ADCDataByChannel[i] >> 8), HEX);
-      Serial.print(",\t\t");
-    }
-  }
-
-  Serial.print("\n\t\tData in Volts:\t\t");
-  
-  for(int i = 0; i < 10; i++) {
-    if (bitRead(channelSetting, i) == 1) {
-      Serial.print(BinaryToVoltage(ADCDataByChannel[i] >> 8), 5);
-      Serial.print(" V,\t");
-    }
-  }
-
-  Serial.println();
-}*/
 
 /*! Reads the value of a register. */
 unsigned long AD7193::GetRegisterValue(unsigned char registerAddress, unsigned char bytesNumber, unsigned char modifyCS)  {//getregistervalue
@@ -436,9 +343,9 @@ unsigned long AD7193::GetRegisterValue(unsigned char registerAddress, unsigned c
     Serial.print(", command: ");
     Serial.print(writeByte, HEX);
     Serial.print(", recieved: ");
-    Serial.print(buffer, HEX);
-    Serial.print(" - ");
-    Serial.println(str);
+    Serial.println(buffer, HEX);
+    //Serial.print(" - ");
+    //Serial.println(str);
     
     
     return(buffer);
@@ -480,7 +387,7 @@ void AD7193::SetRegisterValue(unsigned char registerAddress,  unsigned long regi
 }
 
 void AD7193::ReadRegisterMap(void)  {
-  Serial.println("\nRead All Register Values");
+  Serial.println("\n\nRead All Register Values (helpful for troubleshooting)");
   GetRegisterValue(0, 1, 1);
   GetRegisterValue(1, 3, 1);
   GetRegisterValue(2, 3, 1);
@@ -491,11 +398,3 @@ void AD7193::ReadRegisterMap(void)  {
   delay(100);
 }
 
-/*void AD7193::WriteAllRegisters(void) {
-  Serial.println("\nWriting all new register values to registers...");
-  SetRegisterValue(1, registerMap[1], registerSize[1], 1);
-  SetRegisterValue(2, registerMap[2], registerSize[2], 1);
-  SetRegisterValue(3, registerMap[3], registerSize[3], 1);
-  SetRegisterValue(4, registerMap[4], registerSize[4], 1);
-  delay(100);
-}*/
