@@ -2,6 +2,8 @@
 
 The AD7193 is a 24-bit, 4-channel Sigma-Delta ADC with built-in PGA.  More information can be found at http://www.analog.com/ad7193.
 
+Tutorial can be found at https://ez.analog.com/docs/DOC-18020-ad7193-arduino-tutorial-thermocouple-measurements
+
 The initial release of this library provides a simple set of functions to measure voltage per channel, capable of either differential or psuedo differential voltage measurements.
 
 There are also basic examples to demonstrate differential and psuedo-differential measurement.
