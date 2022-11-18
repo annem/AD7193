@@ -1,4 +1,5 @@
 # AD7193 Arduino Library
+[![Compile Examples](https://github.com/annem/AD7193/workflows/Compile%20Examples/badge.svg)](https://github.com/annem/AD7193/actions?workflow=Compile+Examples)
 
 The AD7193 is a 24-bit, 4-channel Sigma-Delta ADC with built-in PGA.  More information can be found at http://www.analog.com/ad7193.
 
